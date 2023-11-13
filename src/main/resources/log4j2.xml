@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{dd-MM-yyyy'T'HH:mm:ss} %p %m%n</Property>
+        <Property name="LOG_PATTERN_CONSOLE">%d{HH:mm:ss} %p %m%n</Property>
+        <Property name="APP_LOG_ROOT">C:\Users\MSTLRT90H\Desktop\Log\Log_VenditaBiglietti_Evento</Property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN_CONSOLE}"/>
+        </Console>
+
+        <RollingFile name="debugLog" fileName="${APP_LOG_ROOT}/application-debug.log"
+                     filePattern="${APP_LOG_ROOT}/application-debug-%d{dd-MM-yyyy}-%i.log" >
+            <LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <RollingFile name="infoLog" fileName="${APP_LOG_ROOT}/application-info.log"
+                     filePattern="${APP_LOG_ROOT}/application-info-%d{dd-MM-yyyy}-%i.log" >
+            <LevelRangeFilter minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <RollingFile name="warnLog" fileName="${APP_LOG_ROOT}/application-warn.log"
+                     filePattern="${APP_LOG_ROOT}/application-warn-%d{dd-MM-yyyy}-%i.log" >
+            <LevelRangeFilter minLevel="WARN" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <RollingFile name="errorLog" fileName="${APP_LOG_ROOT}/application-error.log"
+                     filePattern="${APP_LOG_ROOT}/application-error-%d{dd-MM-yyyy}-%i.log" >
+            <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <RollingFile name="fatalLog" fileName="${APP_LOG_ROOT}/application-fatal.log"
+                     filePattern="${APP_LOG_ROOT}/application-warn-%d{dd-MM-yyyy}-%i.log" >
+            <LevelRangeFilter minLevel="FATAL" maxLevel="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="all">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="debugLog" />
+            <AppenderRef ref="infoLog"/>
+            <AppenderRef ref="warnLog"/>
+            <AppenderRef ref="errorLog"/>
+            <AppenderRef ref="fatalLog"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
