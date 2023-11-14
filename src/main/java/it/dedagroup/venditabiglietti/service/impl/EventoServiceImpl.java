@@ -23,27 +23,27 @@ public class EventoServiceImpl implements EventoService {
 
     @Override
     public Evento findByIdAndIsCancellatoFalse(long id) {
-        return evRepo.findByIdAndIsCancellatoFalse(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con questo id o evento cancellato."));
+        return evRepo.findByIdAndIsCancellatoFalse(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questo id o evento cancellato."));
     }
 
     @Override
     public List<Evento> findAllByIds(List<Long> ids) {
         List<Evento> eventi = evRepo.findAllById(ids).stream().filter(e -> !e.isCancellato()).toList();
         if(eventi.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con questi id.");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questi id.");
         }
         return eventi;
     }
 
     @Override
     public Evento findByDescrizioneAndIsCancellatoFalse(String descrizione) {
-        return evRepo.findByDescrizioneAndIsCancellatoFalse(descrizione).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con questa descrizione o evento cancellato."));
+        return evRepo.findByDescrizioneAndIsCancellatoFalse(descrizione).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questa descrizione o evento cancellato."));
     }
 
     @Override
     public List<Evento> findAllByData_EventoAndIsCancellatoFalse(LocalDateTime dataEvento) {
         if(evRepo.findAllByDataEventoAndIsCancellatoFalse(dataEvento).isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento in questa data e ora o evento cancellato.");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento in questa data e ora o evento cancellato.");
         }
         return evRepo.findAllByDataEventoAndIsCancellatoFalse(dataEvento);
     }
@@ -53,7 +53,7 @@ public class EventoServiceImpl implements EventoService {
     public void salva(Evento ev) {
         for(Evento evento : evRepo.findAll()){
             if(evento.getDescrizione().equals(ev.getDescrizione())){
-                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Evento con questa descrizione già esistente");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Evento con questa descrizione già esistente");
             }
         }
         evRepo.save(ev);
@@ -63,7 +63,7 @@ public class EventoServiceImpl implements EventoService {
     @Transactional(rollbackOn = DataAccessException.class)
     public void aggiorna(Evento ev, long id) {
         Evento eventoEsistente = evRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con questo id"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questo id"));
         eventoEsistente.setDataEvento(ev.getDataEvento());
         eventoEsistente.setDescrizione(ev.getDescrizione());
         evRepo.save(ev);
@@ -73,7 +73,7 @@ public class EventoServiceImpl implements EventoService {
     @Transactional(rollbackOn = DataAccessException.class)
     public void cancella(long id){
         Evento eventoEsistente = evRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con questo id"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questo id"));
         eventoEsistente.setCancellato(true);
         evRepo.save(eventoEsistente);
     }
@@ -82,14 +82,14 @@ public class EventoServiceImpl implements EventoService {
     public List<Evento> findAllByIsCancellato(boolean cancellato) {
         List<Evento> eventiDiBoolean = evRepo.findAllByIsCancellato(cancellato);
         if (eventiDiBoolean.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento con cancellato settato su " + cancellato);
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con cancellato settato su " + cancellato);
         }
         return eventiDiBoolean;
     }
 
     @Override
     public Evento findByDataEventoAndDescrizione(LocalDateTime dataEvento, String descrizione) {
-        return evRepo.findByDataEventoAndDescrizioneAndIsCancellatoFalse(dataEvento, descrizione).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento in questa data e con questa descrizione"));
+        return evRepo.findByDataEventoAndDescrizioneAndIsCancellatoFalse(dataEvento, descrizione).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento in questa data e con questa descrizione"));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class EventoServiceImpl implements EventoService {
             }
         }
         if(eventiCheContengonoString.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento trovato con descrizione contenente " + string);
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento trovato con descrizione contenente " + string);
         }
         else{
             return eventiCheContengonoString;
@@ -112,7 +112,7 @@ public class EventoServiceImpl implements EventoService {
     public List<Evento> findEventiFuturi() {
         List<Evento> eventiFuturi = evRepo.findAllByIsCancellato(false).stream().filter(e->e.getDataEvento().isAfter(LocalDateTime.now())).toList();
         if(eventiFuturi.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento in programma.");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento in programma.");
         }
         return eventiFuturi.stream().sorted(Comparator.comparing(Evento::getDataEvento)).toList();
     }
@@ -121,7 +121,7 @@ public class EventoServiceImpl implements EventoService {
     public List<Evento> findEventiPassati() {
         List<Evento> eventiPassati = evRepo.findAllByIsCancellato(false).stream().filter(e->e.getDataEvento().isBefore(LocalDateTime.now())).toList();
         if(eventiPassati.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento passato.");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento passato.");
         }
         return eventiPassati.stream().sorted(Comparator.comparing(Evento::getDataEvento)).toList();
     }
@@ -129,11 +129,11 @@ public class EventoServiceImpl implements EventoService {
     @Override
     public List<Evento> findAllByDataEventoBetweenAndIsCancellatoFalse(LocalDateTime data1, LocalDateTime data2) {
         if (data1.isAfter(data2)) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "La prima data deve essere precedente alla seconda.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La prima data deve essere precedente alla seconda.");
         }
         List<Evento> eventiFraDate = evRepo.findAllByDataEventoBetweenAndIsCancellatoFalse(data1, data2);
         if (eventiFraDate.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento compreso fra queste due date.");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento compreso fra queste due date.");
         } else {
             return eventiFraDate.stream().sorted(Comparator.comparing(Evento::getDataEvento)).toList();
         }

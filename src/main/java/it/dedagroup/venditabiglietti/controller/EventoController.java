@@ -15,13 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("evento/")
+@RequestMapping("/evento")
 public class EventoController {
 
     @Autowired
@@ -36,17 +34,17 @@ public class EventoController {
             @ApiResponse(responseCode = "400", description = "Non è stato inserito un numero come id ma un carattere non consentito.",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BadRequestDTOResponse.class)))
     })
-    @GetMapping("id/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<Evento> findById(@PathVariable long id){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByIdAndIsCancellatoFalse(id));
     }
 
-    @GetMapping("ids")
+    @GetMapping("/ids")
     public ResponseEntity<List<Evento>> findAllByIds(@RequestBody List<Long> ids){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIds(ids));
     }
 
-    @PostMapping("salva")
+    @PostMapping("/salva")
     public ResponseEntity<Void> salva(@Valid @RequestBody EventoDTORequest req){
         Evento evento = new Evento();
         evento.setDataEvento(req.getData());
@@ -55,54 +53,54 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("aggiorna/{idEvento}")
+    @PostMapping("/aggiorna/{idEvento}")
     public ResponseEntity<Void> aggiorna(@Valid @RequestBody Evento ev, @PathVariable long idEvento){
         eventoService.aggiorna(ev, idEvento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("cancella/{idEvento}")
+    @PostMapping("/cancella/{idEvento}")
     public ResponseEntity<Void> cancella(@PathVariable long idEvento){
         eventoService.cancella(idEvento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("trovaPerData")
+    @GetMapping("/trovaPerData")
     public ResponseEntity<List<Evento>> trovaPerData(@RequestParam LocalDateTime data){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByData_EventoAndIsCancellatoFalse(data));
     }
 
-    @PostMapping("trovaPerDescrizione")
+    @PostMapping("/trovaPerDescrizione")
     public ResponseEntity<Evento> trovaPerDescrizione(@RequestParam String descrizione){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByDescrizioneAndIsCancellatoFalse(descrizione));
     }
 
-    @PostMapping("trovaPerCancellato")
+    @PostMapping("/trovaPerCancellato")
     public ResponseEntity<List<Evento>> trovaPerCancellato(@RequestParam boolean cancellato){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIsCancellato(cancellato));
     }
 
-    @PostMapping("trovaPerDataEDescrizione")
+    @PostMapping("/trovaPerDataEDescrizione")
     public ResponseEntity<Evento> trovaPerDataEDescrizione(@Valid @RequestBody EventoDTORequest request){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByDataEventoAndDescrizione(request.getData(), request.getDescrizione()));
     }
 
-    @PostMapping("trovaEventiCheContengono")
+    @PostMapping("/trovaEventiCheContengono")
     public ResponseEntity<List<Evento>> trovaEventiCheContengonoInDescrizione(@RequestParam String string){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllEventiCheContengonoInDescrizione(string));
     }
 
-    @PostMapping("trovaEventiFraDueDate")
+    @PostMapping("/trovaEventiFraDueDate")
     public ResponseEntity<List<Evento>> trovaEventiFraDueDate(@RequestParam LocalDateTime data1, @RequestParam LocalDateTime data2){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataEventoBetweenAndIsCancellatoFalse(data1, data2));
     }
 
-    @GetMapping("trovaEventiFuturi")
+    @GetMapping("/trovaEventiFuturi")
     public ResponseEntity<List<Evento>> eventiFuturi(){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findEventiFuturi());
     }
 
-    @GetMapping("trovaEventiPassati")
+    @GetMapping("/trovaEventiPassati")
     public ResponseEntity<List<Evento>> eventiPassati(){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findEventiPassati());
     }
