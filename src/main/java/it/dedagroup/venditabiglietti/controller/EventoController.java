@@ -10,11 +10,16 @@ import it.dedagroup.venditabiglietti.dto.response.BadRequestDTOResponse;
 import it.dedagroup.venditabiglietti.model.Evento;
 import it.dedagroup.venditabiglietti.service.def.EventoService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,23 +44,46 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByIdAndIsCancellatoFalse(id));
     }
 
+    @Operation(summary = "Trova eventi tramite id specificati", description = "Questo endpoint recupera uno o più eventi, che hanno l'attributo cancellato settato su false, a cui corrispondono gli id inviati tramite lista in request.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of interventions of the requested type retrieved successfully.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Evento.class))),
+            @ApiResponse(responseCode = "406", description = "Nessun evento trovato con questo id.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BadRequestDTOResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Non è stato inserito alcun numero oppure è presente un id con formato non valido.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BadRequestDTOResponse.class)))
+    })
     @GetMapping("/ids")
     public ResponseEntity<List<Evento>> findAllByIds(@RequestBody List<Long> ids){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIds(ids));
     }
 
+    @Operation(summary = "Aggiungi evento", description = "Questo endpoint permette l'aggiunta di un nuovo evento, a meno che la descrizione inserita non sia già associata")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of interventions of the requested type retrieved successfully.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Evento.class))),
+            @ApiResponse(responseCode = "403", description = "Evento con questa descrizione già esistente.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BadRequestDTOResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Uno o più dei campi richiesti è stato lasciato vuoto. ",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BadRequestDTOResponse.class)))
+    })
     @PostMapping("/salva")
     public ResponseEntity<Void> salva(@Valid @RequestBody EventoDTORequest req){
         Evento evento = new Evento();
-        evento.setDataEvento(req.getData());
+        evento.setData(req.getData());
+        evento.setOra(req.getOra());
         evento.setDescrizione(req.getDescrizione());
         eventoService.salva(evento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PostMapping("/aggiorna/{idEvento}")
-    public ResponseEntity<Void> aggiorna(@Valid @RequestBody Evento ev, @PathVariable long idEvento){
-        eventoService.aggiorna(ev, idEvento);
+    public ResponseEntity<Void> aggiorna(@Valid @RequestBody EventoDTORequest req, @PathVariable long idEvento){
+        Evento evento = new Evento();
+        evento.setData(req.getData());
+        evento.setOra(req.getOra());
+        evento.setDescrizione(req.getDescrizione());
+        eventoService.aggiorna(evento, idEvento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -66,8 +94,8 @@ public class EventoController {
     }
 
     @GetMapping("/trovaPerData")
-    public ResponseEntity<List<Evento>> trovaPerData(@RequestParam LocalDateTime data){
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByData_EventoAndIsCancellatoFalse(data));
+    public ResponseEntity<List<Evento>> trovaPerData(@RequestParam LocalDate data){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataAndIsCancellatoFalse(data));
     }
 
     @PostMapping("/trovaPerDescrizione")
@@ -75,14 +103,14 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByDescrizioneAndIsCancellatoFalse(descrizione));
     }
 
-    @PostMapping("/trovaPerCancellato")
-    public ResponseEntity<List<Evento>> trovaPerCancellato(@RequestParam boolean cancellato){
+    @PostMapping("/trovaTuttiConCancellatoSu")
+    public ResponseEntity<List<Evento>> trovaTuttiConCancellatoSu(@RequestParam boolean cancellato){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIsCancellato(cancellato));
     }
 
     @PostMapping("/trovaPerDataEDescrizione")
-    public ResponseEntity<Evento> trovaPerDataEDescrizione(@Valid @RequestBody EventoDTORequest request){
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByDataEventoAndDescrizione(request.getData(), request.getDescrizione()));
+    public ResponseEntity<Evento> trovaPerDataEDescrizione(@RequestParam LocalDate data, @RequestParam String descrizione){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findByDataAndDescrizioneAndIsCancellatoFalse(data, descrizione));
     }
 
     @PostMapping("/trovaEventiCheContengono")
@@ -91,8 +119,8 @@ public class EventoController {
     }
 
     @PostMapping("/trovaEventiFraDueDate")
-    public ResponseEntity<List<Evento>> trovaEventiFraDueDate(@RequestParam LocalDateTime data1, @RequestParam LocalDateTime data2){
-        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataEventoBetweenAndIsCancellatoFalse(data1, data2));
+    public ResponseEntity<List<Evento>> trovaEventiFraDueDate(@RequestParam LocalDate data1, @RequestParam LocalDate data2){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataBetweenAndIsCancellatoFalse(data1, data2));
     }
 
     @GetMapping("/trovaEventiFuturi")
@@ -105,7 +133,13 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findEventiPassati());
     }
 
-    //trova eventi prima di data
+    @GetMapping("/trovaEventiDopoData")
+    public ResponseEntity<List<Evento>> eventiDopoData(@RequestParam LocalDate data){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataAfterAndIsCancellatoFalse(data));
+    }
 
-    //trova eventi dopo di data
+    @GetMapping("/trovaEventiPrimaDiData")
+    public ResponseEntity<List<Evento>> eventiPrimaDiData(@RequestParam LocalDate data){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataBeforeAndIsCancellatoFalse(data));
+    }
 }
