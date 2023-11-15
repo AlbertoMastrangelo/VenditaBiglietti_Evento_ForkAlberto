@@ -16,11 +16,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -97,23 +94,65 @@ class VenditaBigliettiEventoApplicationTests {
         EventoDTORequest eDTOReq = new EventoDTORequest();
         LocalDate dataIns = LocalDate.parse("2023-11-06");
         LocalTime ora = LocalTime.of(23, 00, 00);
+        long idLuogo = 1;
+        long idManifestazione = 4;
         eDTOReq.setData(dataIns);
         eDTOReq.setOra(ora);
         eDTOReq.setDescrizione("Festival Bar");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
         String json = mapper.writeValueAsString(eDTOReq);
         mvc.perform(MockMvcRequestBuilders.post("/evento/salva").contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json).accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+    }
+
+    @Test @Order(4)
+    void salvaLuogoFail() throws Exception{
+        EventoDTORequest eDTOReq = new EventoDTORequest();
+        LocalDate dataIns = LocalDate.parse("2023-11-11");
+        LocalTime ora = LocalTime.of(21, 00, 00);
+        long idLuogo = 5;
+        long idManifestazione = 3;
+        eDTOReq.setData(dataIns);
+        eDTOReq.setOra(ora);
+        eDTOReq.setDescrizione("Sanremo");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
+        String json = mapper.writeValueAsString(eDTOReq);
+        mvc.perform(MockMvcRequestBuilders.post("/evento/salva").contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(json).accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isNotAcceptable()).andReturn();
+    }
+
+    @Test @Order(5)
+    void salvaManifestazioneFail() throws Exception{
+        EventoDTORequest eDTOReq = new EventoDTORequest();
+        LocalDate dataIns = LocalDate.parse("2023-12-23");
+        LocalTime ora = LocalTime.of(19, 00, 00);
+        long idLuogo = 2;
+        long idManifestazione = 1;
+        eDTOReq.setData(dataIns);
+        eDTOReq.setOra(ora);
+        eDTOReq.setDescrizione("Sanremo");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
+        String json = mapper.writeValueAsString(eDTOReq);
+        mvc.perform(MockMvcRequestBuilders.post("/evento/salva").contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(json).accept(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isConflict()).andReturn();
     }
 
     @Test
     void aggiornaOk() throws Exception{
         EventoDTORequest eDTOReq = new EventoDTORequest();
         long id = 9;
+        long idLuogo = 3;
+        long idManifestazione = 2;
         LocalDate dataIns = LocalDate.parse("2023-11-09");
         LocalTime ora = LocalTime.of(22, 00, 00);
         eDTOReq.setData(dataIns);
         eDTOReq.setOra(ora);
         eDTOReq.setDescrizione("Concerto JUnit");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
         String json = mapper.writeValueAsString(eDTOReq);
         mvc.perform(MockMvcRequestBuilders.post("/evento/aggiorna/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(json)
@@ -124,11 +163,15 @@ class VenditaBigliettiEventoApplicationTests {
     void aggiornaIdSbagliato() throws Exception{
         EventoDTORequest eDTOReq = new EventoDTORequest();
         long id = 90;
+        long idLuogo = 3;
+        long idManifestazione = 2;
         LocalDate dataIns = LocalDate.parse("2023-11-09");
         LocalTime ora = LocalTime.of(22, 00, 00);
         eDTOReq.setData(dataIns);
         eDTOReq.setOra(ora);
         eDTOReq.setDescrizione("Concerto errore update");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
         String json = mapper.writeValueAsString(eDTOReq);
         mvc.perform(MockMvcRequestBuilders.post("/evento/aggiorna/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(json)
@@ -139,11 +182,15 @@ class VenditaBigliettiEventoApplicationTests {
     void aggiornaDescGiàEsistente() throws Exception{
         EventoDTORequest eDTOReq = new EventoDTORequest();
         long id = 2;
+        long idLuogo = 3;
+        long idManifestazione = 2;
         LocalDate dataIns = LocalDate.parse("2023-11-09");
         LocalTime ora = LocalTime.of(22, 00, 00);
         eDTOReq.setData(dataIns);
         eDTOReq.setOra(ora);
         eDTOReq.setDescrizione("Madonna live Pescara");
+        eDTOReq.setIdLuogo(idLuogo);
+        eDTOReq.setIdManifestazione(idManifestazione);
         String json = mapper.writeValueAsString(eDTOReq);
         mvc.perform(MockMvcRequestBuilders.post("/evento/aggiorna/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(json)
@@ -375,6 +422,35 @@ class VenditaBigliettiEventoApplicationTests {
         mvc.perform(MockMvcRequestBuilders.get("/evento/trovaEventiPrimaDiData")
                         .param("data", data.toString()).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotAcceptable()).andReturn();
+    }
+
+    @Test
+    void trovaEventiConDataDa() throws Exception{
+        LocalDate data = LocalDate.of(2023, 12, 22);
+        mvc.perform(MockMvcRequestBuilders.get("/evento/trovaEventiConDataDa")
+                .param("data", data.toString()).contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].descrizione").value("Madonna live Pescara"))
+                .andExpect(jsonPath("$[0].data").value("2023-12-22"))
+                .andExpect(jsonPath("$[0].ora").value("21:00:00"))
+                .andReturn();
+    }
+
+    @Test
+    void trovaEventiConDataDaNoParam() throws Exception{
+        mvc.perform(MockMvcRequestBuilders.get("/evento/trovaEventiConDataDa")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void trovaEventiConDataDaFail() throws Exception{
+        LocalDate data = LocalDate.of(2025, 10, 1);
+        mvc.perform(MockMvcRequestBuilders.get("/evento/trovaEventiConDataDa")
+                        .param("data", data.toString()).contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
     }
 
 }

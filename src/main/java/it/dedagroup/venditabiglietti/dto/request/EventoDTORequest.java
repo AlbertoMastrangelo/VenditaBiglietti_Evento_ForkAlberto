@@ -1,13 +1,11 @@
 package it.dedagroup.venditabiglietti.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -18,4 +16,8 @@ public class EventoDTORequest {
     LocalTime ora;
     @NotBlank(message = "Il campo descrizione non può essere vuoto.")
     String descrizione;
+    @Min(value = 1, message = "L'id del luogo associato deve essere almeno 1")
+    private long idLuogo;
+    @Min(value = 1, message = "L'id del luogo associato deve essere almeno 1")
+    private long idManifestazione;
 }

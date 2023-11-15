@@ -22,6 +22,10 @@ public class Evento {
     private String descrizione;
     @Column(nullable = false)
     private boolean isCancellato;
+    @Column(nullable = false)
+    private long idLuogo;
+    @Column(nullable = false)
+    private long idManifestazione;
     @Version
     private long version;
 
