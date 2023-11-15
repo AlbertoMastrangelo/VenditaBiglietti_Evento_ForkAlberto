@@ -1,12 +1,15 @@
 package it.dedagroup.venditabiglietti.service.def;
 
 import it.dedagroup.venditabiglietti.model.Evento;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventoService {
+    List<Evento> findAllByIdLuogo(long idLuogo);
+    List<Evento> findAllByIdManifestazioneAndIsCancellatoFalse(long idManifestazione);
     Evento findByIdAndIsCancellatoFalse(long id);
     List<Evento> findAllByIds(List<Long> ids);
     Evento findByDescrizioneAndIsCancellatoFalse(String descrizione);
@@ -26,5 +29,7 @@ public interface EventoService {
     List<Evento> findAllByDataBetweenAndIsCancellatoFalse(LocalDate data1, LocalDate data2);
     List<Evento> findAllByDataAfterAndIsCancellatoFalse(LocalDate data);
     List<Evento> findAllByDataBeforeAndIsCancellatoFalse(LocalDate data);
+
+    List<Evento> findAllByDataOnwards(LocalDate data);
 
 }

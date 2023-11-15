@@ -24,6 +24,32 @@ public class EventoServiceImpl implements EventoService {
     EventoRepository evRepo;
 
     @Override
+    public List<Evento> findAllByIdLuogo(long idLuogo) {
+        List<Long> idLuoghi = evRepo.findAllByIsCancellato(false).stream().map(Evento::getIdLuogo).toList();
+        if(!idLuoghi.contains(idLuogo)){
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Luogo con questo id inesistente.");
+        }
+        List<Evento> eventiInLuogo = evRepo.findAllByIdLuogoAndIsCancellatoFalse(idLuogo);
+        if(eventiInLuogo.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento programmato o avvenuto in questo luogo");
+        }
+        return eventiInLuogo;
+    }
+
+    @Override
+    public List<Evento> findAllByIdManifestazioneAndIsCancellatoFalse(long idManifestazione) {
+        List<Long> idManifestazioni = evRepo.findAllByIsCancellato(false).stream().map(Evento::getIdManifestazione).toList();
+        if(!idManifestazioni.contains(idManifestazione)){
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Manifestazione con questo id inesistente.");
+        }
+        List<Evento> eventiDiManifestazione = evRepo.findAllByIdManifestazioneAndIsCancellatoFalse(idManifestazione);
+        if(eventiDiManifestazione.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento programmato o avvenuto per questa manifestazione.");
+        }
+        return eventiDiManifestazione;
+    }
+
+    @Override
     public Evento findByIdAndIsCancellatoFalse(long id) {
         return evRepo.findByIdAndIsCancellatoFalse(id).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questo id o evento cancellato."));
     }
@@ -58,8 +84,14 @@ public class EventoServiceImpl implements EventoService {
     @Transactional(rollbackOn = DataAccessException.class)
     public void salva(Evento ev) {
         for(Evento evento : evRepo.findAll()){
-            if(evento.getDescrizione().equals(ev.getDescrizione())){
+            if(evento.getDescrizione().equalsIgnoreCase(ev.getDescrizione())){
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Evento con questa descrizione già esistente.");
+            }
+            if(evento.getData().equals(ev.getData()) && evento.getIdLuogo() == ev.getIdLuogo()){
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Impossibile creare evento, luogo già occupato in tale data");
+            }
+            if(evento.getData().equals(ev.getData()) && evento.getIdManifestazione() == ev.getIdManifestazione()){
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Esiste già un evento per questa manifestazione in questa data");
             }
         }
         evRepo.save(ev);
@@ -70,13 +102,19 @@ public class EventoServiceImpl implements EventoService {
     public void aggiorna(Evento ev, long id) {
         Evento eventoEsistente = evRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento con questo id"));
-        eventoEsistente.setData(ev.getData());
-        eventoEsistente.setOra(ev.getOra());
         for(Evento evento : evRepo.findAll()){
             if (evento.getDescrizione().equalsIgnoreCase(ev.getDescrizione())){
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Evento con questa descrizione già esistente.");
             }
+            if(evento.getData().equals(ev.getData()) && evento.getIdLuogo() == ev.getIdLuogo()){
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Impossibile creare evento, luogo già occupato in tale data");
+            }
+            if(evento.getData().equals(ev.getData()) && evento.getIdManifestazione() == ev.getIdManifestazione()){
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Esiste già un evento per questa manifestazione in questa data");
+            }
         }
+        eventoEsistente.setData(ev.getData());
+        eventoEsistente.setOra(ev.getOra());
         eventoEsistente.setDescrizione(ev.getDescrizione());
         evRepo.save(ev);
     }
@@ -221,6 +259,15 @@ public class EventoServiceImpl implements EventoService {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento prima della data selezionata.");
         }
         return eventiPrimaDiData.stream().sorted(Comparator.comparing(Evento::getData).thenComparing(Evento::getOra)).toList();
+    }
+
+    @Override
+    public List<Evento> findAllByDataOnwards(LocalDate data) {
+        List<Evento> eventiConDataDa = evRepo.findAllByDataOnwards(data);
+        if(eventiConDataDa.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento a partire da questa data.");
+        }
+        return eventiConDataDa;
     }
 
 }

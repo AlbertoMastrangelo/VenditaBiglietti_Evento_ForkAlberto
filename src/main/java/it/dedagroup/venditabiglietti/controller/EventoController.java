@@ -12,15 +12,12 @@ import it.dedagroup.venditabiglietti.service.def.EventoService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -29,6 +26,15 @@ public class EventoController {
 
     @Autowired
     EventoService eventoService;
+    @GetMapping("/trovaEventiInLuogo/{idLuogo}")
+    public ResponseEntity<List<Evento>> trovaEventiInLuogo(@PathVariable @Min(value = 1, message = "l'id deve essere almeno 1") long idLuogo){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIdLuogo(idLuogo));
+    }
+
+    @GetMapping("/trovaEventiDiManifestazione/{idManifestazione}")
+    public ResponseEntity<List<Evento>> trovaEventiDiManifestazione(@PathVariable @Min(value = 1, message = "l'id deve essere almeno 1") long idManifestazione){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIdManifestazioneAndIsCancellatoFalse(idManifestazione));
+    }
 
     @Operation(summary = "Trova evento per id", description = "Questo endpoint recupera un singolo evento, che ha l'attributo cancellato settato su false, tramite l'id inserito nell'url.")
     @ApiResponses(value = {
@@ -73,6 +79,8 @@ public class EventoController {
         evento.setData(req.getData());
         evento.setOra(req.getOra());
         evento.setDescrizione(req.getDescrizione());
+        evento.setIdLuogo(req.getIdLuogo());
+        evento.setIdManifestazione(req.getIdManifestazione());
         eventoService.salva(evento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -83,6 +91,8 @@ public class EventoController {
         evento.setData(req.getData());
         evento.setOra(req.getOra());
         evento.setDescrizione(req.getDescrizione());
+        evento.setIdLuogo(req.getIdLuogo());
+        evento.setIdManifestazione(req.getIdManifestazione());
         eventoService.aggiorna(evento, idEvento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -141,5 +151,10 @@ public class EventoController {
     @GetMapping("/trovaEventiPrimaDiData")
     public ResponseEntity<List<Evento>> eventiPrimaDiData(@RequestParam LocalDate data){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataBeforeAndIsCancellatoFalse(data));
+    }
+
+    @GetMapping("/trovaEventiConDataDa")
+    public ResponseEntity<List<Evento>> eventiConDataDa(@RequestParam LocalDate data){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataOnwards(data));
     }
 }
