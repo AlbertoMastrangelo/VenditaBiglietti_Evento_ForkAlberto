@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.dedagroup.venditabiglietti.dto.request.EventoDTORequest;
+import it.dedagroup.venditabiglietti.dto.request.FiltraEventoDTORequest;
 import it.dedagroup.venditabiglietti.dto.response.BadRequestDTOResponse;
 import it.dedagroup.venditabiglietti.model.Evento;
 import it.dedagroup.venditabiglietti.service.def.EventoService;
@@ -156,5 +157,10 @@ public class EventoController {
     @GetMapping("/trovaEventiConDataDa")
     public ResponseEntity<List<Evento>> eventiConDataDa(@RequestParam LocalDate data){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataOnwards(data));
+    }
+
+    @GetMapping("/filtraEventi")
+    public ResponseEntity<List<Evento>> filtraEventi(@RequestBody FiltraEventoDTORequest request){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.filtraEventi(request));
     }
 }
