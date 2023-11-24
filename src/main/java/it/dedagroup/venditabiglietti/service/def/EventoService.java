@@ -1,5 +1,6 @@
 package it.dedagroup.venditabiglietti.service.def;
 
+import it.dedagroup.venditabiglietti.dto.request.FiltraEventoDTORequest;
 import it.dedagroup.venditabiglietti.model.Evento;
 import org.springframework.data.repository.query.Param;
 
@@ -31,5 +32,7 @@ public interface EventoService {
     List<Evento> findAllByDataBeforeAndIsCancellatoFalse(LocalDate data);
 
     List<Evento> findAllByDataOnwards(LocalDate data);
+
+    List<Evento> filtraEventi(FiltraEventoDTORequest request);
 
 }

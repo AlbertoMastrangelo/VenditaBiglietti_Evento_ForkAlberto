@@ -1,5 +1,7 @@
 package it.dedagroup.venditabiglietti.service.impl;
 
+import it.dedagroup.venditabiglietti.dto.request.FiltraEventoDTORequest;
+import it.dedagroup.venditabiglietti.repository.CriteriaEventoRepository;
 import it.dedagroup.venditabiglietti.repository.EventoRepository;
 import it.dedagroup.venditabiglietti.model.Evento;
 import it.dedagroup.venditabiglietti.service.def.EventoService;
@@ -22,6 +24,9 @@ public class EventoServiceImpl implements EventoService {
 
     @Autowired
     EventoRepository evRepo;
+
+    @Autowired
+    CriteriaEventoRepository criteriaEventoRepository;
 
     @Override
     public List<Evento> findAllByIdLuogo(long idLuogo) {
@@ -268,6 +273,11 @@ public class EventoServiceImpl implements EventoService {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Nessun evento a partire da questa data.");
         }
         return eventiConDataDa;
+    }
+
+    @Override
+    public List<Evento> filtraEventi(FiltraEventoDTORequest request) {
+        return criteriaEventoRepository.filtraEventi(request);
     }
 
 }
