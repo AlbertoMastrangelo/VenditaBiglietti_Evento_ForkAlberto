@@ -159,8 +159,14 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByDataOnwards(data));
     }
 
-    @GetMapping("/filtraEventi")
+    @PostMapping("/filtraEventi")
     public ResponseEntity<List<Evento>> filtraEventi(@RequestBody FiltraEventoDTORequest request){
         return ResponseEntity.status(HttpStatus.OK).body(eventoService.filtraEventi(request));
     }
+
+    @GetMapping("/tuttiGliEventi")
+    public ResponseEntity<List<Evento>> trovaTuttiGliEventi(){
+        return ResponseEntity.status(HttpStatus.OK).body(eventoService.findAllByIsCancellatoFalse());
+    }
+
 }

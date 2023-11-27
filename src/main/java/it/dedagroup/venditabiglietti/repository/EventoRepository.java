@@ -26,5 +26,5 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query("SELECT e FROM Evento e WHERE e.data >= :data AND e.isCancellato = false ORDER BY e.data, e.ora")
     List<Evento> findAllByDataOnwards(@Param("data") LocalDate data);
-
+    List<Evento> findAllByIsCancellatoFalse();
 }
