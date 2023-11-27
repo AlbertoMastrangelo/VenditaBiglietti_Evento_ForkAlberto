@@ -34,5 +34,6 @@ public interface EventoService {
     List<Evento> findAllByDataOnwards(LocalDate data);
 
     List<Evento> filtraEventi(FiltraEventoDTORequest request);
+    List<Evento> findAllByIsCancellatoFalse();
 
 }

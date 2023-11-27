@@ -280,4 +280,13 @@ public class EventoServiceImpl implements EventoService {
         return criteriaEventoRepository.filtraEventi(request);
     }
 
+    @Override
+    public List<Evento> findAllByIsCancellatoFalse() {
+        List<Evento> eventi = evRepo.findAllByIsCancellatoFalse();
+        if(eventi.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento esistente.");
+        }
+        return eventi;
+    }
+
 }
