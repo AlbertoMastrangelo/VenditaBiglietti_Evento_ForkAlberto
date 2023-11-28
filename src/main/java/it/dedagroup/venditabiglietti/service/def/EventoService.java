@@ -2,6 +2,7 @@ package it.dedagroup.venditabiglietti.service.def;
 
 import it.dedagroup.venditabiglietti.dto.request.FiltraEventoDTORequest;
 import it.dedagroup.venditabiglietti.model.Evento;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
