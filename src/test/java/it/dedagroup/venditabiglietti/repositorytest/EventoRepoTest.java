@@ -43,7 +43,7 @@ public class EventoRepoTest {
     @Test
     public void findAllByData(){
         LocalDate data = LocalDate.of(2023, 12, 22);
-        List<Evento> eventi = eRepo.findAllByDataAndIsCancellatoFalse(data);
+        List<Evento> eventi = eRepo.findAllByDataAndIsCancellatoFalseOrderByOraAsc(data);
         assertEquals(2, eventi.size());
     }
 

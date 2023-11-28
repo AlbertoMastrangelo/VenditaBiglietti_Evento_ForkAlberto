@@ -2,7 +2,6 @@ package it.dedagroup.venditabiglietti.repository;
 
 import it.dedagroup.venditabiglietti.dto.request.FiltraEventoDTORequest;
 import it.dedagroup.venditabiglietti.model.Evento;
-import it.dedagroup.venditabiglietti.service.def.EventoService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -35,4 +34,19 @@ public class CriteriaEventoRepository {
                 .sorted(Comparator.comparing(Evento::getData).thenComparing(Evento::getOra))
                 .toList();
     }
+
+    public List<Evento> cercaEventi(Evento ev) {
+        CriteriaBuilder cb = manager.getCriteriaBuilder();
+        CriteriaQuery<Evento> cq = cb.createQuery(Evento.class);
+        Root<Evento> evento = cq.from(Evento.class);
+
+        Predicate descrizionePredicate = cb.equal(cb.lower(evento.get("descrizione")), ev.getDescrizione().toLowerCase());
+        Predicate luogoPredicate = cb.and(cb.equal(evento.get("idLuogo"), ev.getIdLuogo()), cb.equal(evento.get("data"), ev.getData()));
+        Predicate manifestazionePredicate = cb.and(cb.equal(evento.get("idManifestazione"), ev.getIdManifestazione()), cb.equal(evento.get("data"), ev.getData()));
+
+        cq.select(evento).where(cb.or(descrizionePredicate, luogoPredicate, manifestazionePredicate));
+
+        return manager.createQuery(cq).getResultList();
+    }
+
 }
