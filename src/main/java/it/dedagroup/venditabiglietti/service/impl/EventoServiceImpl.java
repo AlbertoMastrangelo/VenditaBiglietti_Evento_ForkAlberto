@@ -277,7 +277,7 @@ public class EventoServiceImpl implements EventoService {
 
     @Override
     public List<Evento> filtraEventi(FiltraEventoDTORequest request) {
-        return criteriaEventoRepository.filtraEventi(request);
+        return criteriaEventoRepository.filtraEventi(request).stream().filter(e-> !e.isCancellato()).toList();
     }
 
     @Override
