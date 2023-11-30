@@ -255,7 +255,7 @@ public class EventoServiceImpl implements EventoService {
 
     @Override
     public List<Evento> filtraEventi(FiltraEventoDTORequest request) {
-        List<Evento> eventiCriteria = criteriaEventoRepository.filtraEventi(request).stream().filter(e-> !e.isCancellato()).toList();
+        List<Evento> eventiCriteria = criteriaEventoRepository.filtraEventi(request);
         if(eventiCriteria.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessun evento trovato con questi criteri.");
         }
