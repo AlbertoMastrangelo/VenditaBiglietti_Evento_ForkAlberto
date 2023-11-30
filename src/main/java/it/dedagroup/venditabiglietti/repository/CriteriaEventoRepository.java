@@ -27,6 +27,7 @@ public class CriteriaEventoRepository {
             predicate.add(builder.greaterThanOrEqualTo(root.get("data"), request.getData()));
         }
         if(request.getDescrizione() != null) predicate.add(builder.like(builder.lower(root.get("descrizione")), "%"+ request.getDescrizione().toLowerCase()+"%"));
+        predicate.add(builder.equal(root.get("isCancellato"), false));
         Predicate[] predicateArray = predicate.toArray(new Predicate[predicate.size()]);
         query.where(predicateArray);
         List<Tuple> list = manager.createQuery(query).getResultList();
